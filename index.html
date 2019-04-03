@@ -35,17 +35,22 @@ var bar_data = ''
 var bar_y_values = []
 var syllables = ''
 var wordsyllables = ''
+var isQuestion = ''
 
 if (word.indexOf(' ') >= 0) {
 	//("More than one word")
 	manywords = word.split(" ")
-	console.log(manywords)
+} else if (word.indexOf('?') >= 0) {
+	//("More than one word")
+	isQuestion = "yes"
 }
 
 
 // For single word processing
 if (manywords == '') {
 
+word = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+word = word.replace(/\s{2,}/g," ");
 word = word.toUpperCase()
 pronun = cmudict["cmudict"][word][0][0]
 bar_data = pronun.replace(/\D/g,'');
@@ -250,6 +255,14 @@ for (var i = 0; i < syllablePoints.length; i++) {
 }
 
 document.getElementById("charttitle").innerHTML = Title
+	
+	
+// QUESTION FORMATTING
+	
+if (isQuestion == 'yes') {
+	window.myLine.config.data.datasets[0].data[syllablePoints.slice(-1)[0]].y = 300
+	Title += "?"
+}
 
 textFit($("#charttitle")[0], {minFontSize:10, maxFontSize: 300})
 
