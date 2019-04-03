@@ -21,61 +21,42 @@
 	<style>
 #charttitle {
   font-size: 13vw;
-
 }
 	</style>
 	
 <script>
-var isQuestion = ''
-
 function returnBarData(word) {
-
 var manywords = ''
 var pronun = ''
 var bar_data = ''
 var bar_y_values = []
 var syllables = ''
 var wordsyllables = ''
-
 if (word.indexOf(' ') >= 0) {
 	//("More than one word")
 	manywords = word.split(" ")
-} else if (word.indexOf('?') >= 0) {
-	//("More than one word")
-	isQuestion = "yes"
+	console.log(manywords)
 }
-
-
 // For single word processing
 if (manywords == '') {
-
-word = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
-word = word.replace(/\s{2,}/g," ");
 word = word.toUpperCase()
 pronun = cmudict["cmudict"][word][0][0]
 bar_data = pronun.replace(/\D/g,'');
-
 // SPLIT THE SYLLABLES
 syllables = pronun.split(" - ")
 wordsyllables = cmudict["cmudict"][word][1]
 } 
-
-
 // AREAS TO EXPAND
 // Change the stress of grammatical word (create a dictionary of unstressed words)
 // Find a way to create intonation for the setnence... How to measure strong stressed words
 // Create a graph for each sentence (set a limit to the number of points on the graph, perhaps)
-
-
 else {
 console.log("process many words together")
-
 for (var i = 0; i < manywords.length; i++) {
 word = manywords[i].toUpperCase()
 pronun += cmudict["cmudict"][word][0][0] + ' - ' 
 wordsyllables += cmudict["cmudict"][word][1] + ' ,'
 }
-
 pronun = pronun.slice(0,-3)
 wordsyllables = wordsyllables.slice(0,-2)
 wordsyllables = wordsyllables.split(',')
@@ -83,11 +64,7 @@ syllables = pronun.split(" - ")
 bar_data += pronun.replace(/\D/g,'');
 console.log(pronun, bar_data, wordsyllables)
 }
-
-
 syllables = [[syllables],[wordsyllables]]
-
-
 for (var i = 0; i < bar_data.length; i++) {
   
   // Stressed syllable has the value 300
@@ -106,47 +83,31 @@ for (var i = 0; i < bar_data.length; i++) {
   bar_y_values.push(y)  
   
   
-
 // PUSH THE DATA POINTS AND PRONUNCIATION  
-
   
   }
   return [bar_y_values, syllables]
 }
-
-
 /// Get the X coordinates of all the data points
 /// Get the centre coordinates for the title
 /// Move the X position to the centre position of the title
-
 function getSyllableCentre(syllable) {
-
 	leftcalc = Math.abs(syllable.getBoundingClientRect().left - chartarea.getBoundingClientRect().left)
 	rightcalc = Math.abs(syllable.getBoundingClientRect().right - chartarea.getBoundingClientRect().left)	
 	centre = (leftcalc + rightcalc) / 2
 	return centre
 }
-
-
-
 function getStressed() {
 	stressed_bar_data = returnBarData(($("input").val()) )
-
 // PHO-to = 1-2       
 // PHO-to-graph = 1-0-2           
 // pho-TOG-ra-phy = 0-1-0-0  
-
 wordPoints = []
 radiusPoints = []
 syllablePoints = []
 colours = ["#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000"]
-
 for (var i = 0; i < stressed_bar_data[0].length; i++) {
-
-
-
 	// Place the syllables as a point
-
 	wordPoints.push({y : stressed_bar_data[0][i], indexLabel:stressed_bar_data[1][1][0][i], x: 0});
 	
 	
@@ -181,8 +142,6 @@ for (var i = 0; i < stressed_bar_data[0].length; i++) {
 	syllablePoints.push(stressed_bar_data[1][1][0][i]);
 	}
 }
-
-
 var config = {
 	type: 'line',
 	data: {
@@ -234,68 +193,41 @@ var config = {
     }
 	}
 };
-
-
 /// TITLE FORMATTING
 // Adds colour to each syllable and seperates it after making it lower case (except for the first letter)
-
 Title = ''
-
 for (var i = 0; i < syllablePoints.length; i++) {
-
 	lowersyllable = syllablePoints[i].toLowerCase()
 	FirstSyllable = syllablePoints[i].charAt(0).toUpperCase() + syllablePoints[i].slice(1);
 	
 	if (i == 0) {
 		Title += '<font id="syl' + i + '" color="' + colours[i] + '" >' + FirstSyllable + '</font>'
 	} else {
-
 	Title += '<font id="syl' + i + '"color="' + colours[i] + '" >' + lowersyllable + '</font>'
 	}
 }
-
 document.getElementById("charttitle").innerHTML = Title
-	
-	
-// QUESTION FORMATTING
-	
-if (isQuestion == 'yes') {
-	window.myLine.config.data.datasets[0].data[syllablePoints.slice(-1)[0]].y = 300
-	Title += "?"
-}
-
 textFit($("#charttitle")[0], {minFontSize:10, maxFontSize: 300})
-
-
 // First Press of the button
-
 if (window.myLine == null){
     var ctx = document.getElementById('canvas').getContext('2d');
 	window.myLine = new Chart(ctx, config);
 	window.myLine.update();
-
 // Second Press of the button
 } else {
-
 ctx = document.getElementById('canvas').getContext('2d');
 window.myLine.ctx = ctx;
 window.myLine.config = config;
 window.myLine.update();
 }
-
 // Loop through one more time and adjust the X coordinates
-
 for (var i = 0; i < syllablePoints.length; i++) {
-
-
 xvalue = getSyllableCentre(eval("syl" + i))
 window.myLine.config.data.datasets[0].data[i].x  = xvalue
 }
-
 window.myLine.update();
 setTimeout(function(){ report() }, 1100);
 }
-
 function report() {
   let region = document.querySelector("#chartarea"); // whole screen
   var canvas = document.querySelector("#screenshot");
@@ -311,7 +243,6 @@ function report() {
   
   
 }
-
 // Press Enter to load the function
 $( document ).ready(function() {
 document.querySelector("#textinput").addEventListener("keyup", event => {
@@ -320,9 +251,6 @@ document.querySelector("#textinput").addEventListener("keyup", event => {
     event.preventDefault(); // No need to `return false;`.
 });
     });
-
-
-
 </script>
 	
   </head>
@@ -372,14 +300,10 @@ document.querySelector("#textinput").addEventListener("keyup", event => {
 				  
 		
 		</center>
-
 	  </div>
 	 
 	
-
-
     </main>
-
 <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 <script src="html2canvas.min.js"></script>
