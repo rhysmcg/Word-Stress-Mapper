@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+	<script src="https://www.chartjs.org/dist/2.8.0/Chart.min.js"></script>
+<script src="https://www.chartjs.org/samples/master/utils.js"></script>
+
+    <title>Pronunciation Practice</title>
+
+    <!-- Bootstrap core CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="Dictionary/cmudict.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+    <!-- Custom styles for this template -->
+    <!--<link href="album.css" rel="stylesheet"> -->
+	
+	<style>
+#charttitle {
+  font-size: 13vw;
+
+}
+	</style>
+	
+<script>
+
+function returnBarData(word) {
+
+var manywords = ''
+var pronun = ''
+var bar_data = ''
+var bar_y_values = []
+var syllables = ''
+var wordsyllables = ''
+
+if (word.indexOf(' ') >= 0) {
+	//("More than one word")
+	manywords = word.split(" ")
+	console.log(manywords)
+}
+
+
+// For single word processing
+if (manywords == '') {
+
+word = word.toUpperCase()
+pronun = cmudict["cmudict"][word][0][0]
+bar_data = pronun.replace(/\D/g,'');
+
+// SPLIT THE SYLLABLES
+syllables = pronun.split(" - ")
+wordsyllables = cmudict["cmudict"][word][1]
+} 
+
+
+// AREAS TO EXPAND
+// Change the stress of grammatical word (create a dictionary of unstressed words)
+// Find a way to create intonation for the setnence... How to measure strong stressed words
+// Create a graph for each sentence (set a limit to the number of points on the graph, perhaps)
+
+
+else {
+console.log("process many words together")
+
+for (var i = 0; i < manywords.length; i++) {
+word = manywords[i].toUpperCase()
+pronun += cmudict["cmudict"][word][0][0] + ' - ' 
+wordsyllables += cmudict["cmudict"][word][1] + ' ,'
+}
+
+pronun = pronun.slice(0,-3)
+wordsyllables = wordsyllables.slice(0,-2)
+wordsyllables = wordsyllables.split(',')
+syllables = pronun.split(" - ")
+bar_data += pronun.replace(/\D/g,'');
+console.log(pronun, bar_data, wordsyllables)
+}
+
+
+syllables = [[syllables],[wordsyllables]]
+
+
+for (var i = 0; i < bar_data.length; i++) {
+  
+  // Stressed syllable has the value 300
+  if (bar_data.charAt(i) == 1) {
+		y = 250
+		
+  // Semi-stressed
+  } else if (bar_data.charAt(i) == 2) {
+		y = 125
+  
+  // No Stress
+  } else if (bar_data.charAt(i) == 0) {
+		y = 100
+  }
+  
+  bar_y_values.push(y)  
+  
+  
+
+// PUSH THE DATA POINTS AND PRONUNCIATION  
+
+  
+  }
+  return [bar_y_values, syllables]
+}
+
+
+/// Get the X coordinates of all the data points
+/// Get the centre coordinates for the title
+/// Move the X position to the centre position of the title
+
+function getSyllableCentre(syllable) {
+
+	leftcalc = Math.abs(syllable.getBoundingClientRect().left - chartarea.getBoundingClientRect().left)
+	rightcalc = Math.abs(syllable.getBoundingClientRect().right - chartarea.getBoundingClientRect().left)	
+	centre = (leftcalc + rightcalc) / 2
+	return centre
+}
+
+
+
+function getStressed() {
+	stressed_bar_data = returnBarData(($("input").val()) )
+
+// PHO-to = 1-2       
+// PHO-to-graph = 1-0-2           
+// pho-TOG-ra-phy = 0-1-0-0  
+
+wordPoints = []
+radiusPoints = []
+syllablePoints = []
+colours = ["#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000","#ED553B", "#F2B134", "#47AB6C", "#0894A1", "#112F41", "#000000"]
+
+for (var i = 0; i < stressed_bar_data[0].length; i++) {
+
+
+
+	// Place the syllables as a point
+
+	wordPoints.push({y : stressed_bar_data[0][i], indexLabel:stressed_bar_data[1][1][0][i], x: 0});
+	
+	
+	//radiusPoints.push(stressed_bar_data[0][i] / 7);
+	
+	// Radius size depends on the stress
+	
+	// MAX stress
+	if (stressed_bar_data[0][i] == 250) {
+		radiusPoints.push(40);
+	}
+	
+	// MID stress
+	if (stressed_bar_data[0][i] == 125) {
+		radiusPoints.push(20);
+	}
+	
+	// Unstressed
+	if (stressed_bar_data[0][i] == 100) {
+		radiusPoints.push(10);
+	}	
+	
+	
+	
+	// Check if word is in the syllables, otherwise just show pronunciation symbols
+	
+	if (stressed_bar_data[1][1][0] === undefined || stressed_bar_data[1][1][0].length == 0) {
+		console.log("not found")
+		syllablePoints.push(stressed_bar_data[1][0][0][i]);
+	}
+	else {
+	syllablePoints.push(stressed_bar_data[1][1][0][i]);
+	}
+}
+
+
+var config = {
+	type: 'line',
+	data: {
+		labels: syllablePoints,
+		datasets: [{
+		label: 'dataset - individual point sizes',
+			data: wordPoints,
+			backgroundColor: window.chartColors.black,
+			borderColor: window.chartColors.black,
+			fill: false,
+			borderDash: [10, 10],
+			pointBackgroundColor: colours,
+			pointRadius: radiusPoints
+		}]
+	},
+	options: {
+		responsive: true,
+		maintainAspectRatio: false,
+		legend: {
+			display: false,
+		},
+		hover: {
+			mode: 'index'
+		},
+		scales: {
+			xAxes: [{
+				display: true,
+				type: 'linear',
+				offset: true,
+				ticks: {
+                max: charttitle.offsetWidth,
+				fontSize: 1,
+                min: 0,
+                stepSize: 1280,
+            },
+			}],
+			yAxes: [{
+				display: false,
+				offset: true,
+			}]
+		},
+		title: {
+			display: true,
+			fontStyle: 'bold',
+			text: ' '
+		},
+		tooltips: {
+         enabled: false
+    }
+	}
+};
+
+
+/// TITLE FORMATTING
+// Adds colour to each syllable and seperates it after making it lower case (except for the first letter)
+
+Title = ''
+
+for (var i = 0; i < syllablePoints.length; i++) {
+
+	lowersyllable = syllablePoints[i].toLowerCase()
+	FirstSyllable = syllablePoints[i].charAt(0).toUpperCase() + syllablePoints[i].slice(1);
+	
+	if (i == 0) {
+		Title += '<font id="syl' + i + '" color="' + colours[i] + '" >' + FirstSyllable + '</font>'
+	} else {
+
+	Title += '<font id="syl' + i + '"color="' + colours[i] + '" >' + lowersyllable + '</font>'
+	}
+}
+
+document.getElementById("charttitle").innerHTML = Title
+
+textFit($("#charttitle")[0], {minFontSize:10, maxFontSize: 300})
+
+
+// First Press of the button
+
+if (window.myLine == null){
+    var ctx = document.getElementById('canvas').getContext('2d');
+	window.myLine = new Chart(ctx, config);
+	window.myLine.update();
+
+// Second Press of the button
+} else {
+
+ctx = document.getElementById('canvas').getContext('2d');
+window.myLine.ctx = ctx;
+window.myLine.config = config;
+window.myLine.update();
+}
+
+// Loop through one more time and adjust the X coordinates
+
+for (var i = 0; i < syllablePoints.length; i++) {
+
+
+xvalue = getSyllableCentre(eval("syl" + i))
+window.myLine.config.data.datasets[0].data[i].x  = xvalue
+}
+
+window.myLine.update();
+setTimeout(function(){ report() }, 1100);
+}
+
+function report() {
+  let region = document.querySelector("#chartarea"); // whole screen
+  var canvas = document.querySelector("#screenshot");
+  html2canvas(region, {
+	scale: 2,
+	canvas: canvas,
+    onrendered: function(canvas) {
+      let pngUrl = canvas.toDataURL();
+      let img = document.querySelector(".screen");
+      img.src = pngUrl; 
+    },
+  });
+  
+  
+}
+
+// Press Enter to load the function
+$( document ).ready(function() {
+document.querySelector("#textinput").addEventListener("keyup", event => {
+    if(event.key !== "Enter") return; // Use `.key` instead.
+    getStressed();
+    event.preventDefault(); // No need to `return false;`.
+});
+    });
+
+
+
+</script>
+	
+  </head>
+
+  <body>
+
+    <header>
+    </header>
+
+    <main role="main">
+
+
+
+      <center><div class="album py-5 bg-white" style="max-width: 80%">
+	  
+				  <h1>Word Stress Mapper</h1>
+
+				  <input type="text" id="textinput" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm" /></p>
+				  
+				  <div><button type="button" id="buttonclick" class="btn btn-primary btn-lg" onclick="getStressed();" >Get Word Stress</button></div>
+				  <div style="height: 50px; width: 540px;"></div>
+				  
+				  <!-- Powerpoint area -->
+				  
+				  
+				   <div id = "chartarea" style="height:66vh; width:100%; border:1px solid black;">
+
+				   <h1 id="charttitle" style="width:100%;height:45%"></h1>
+				   
+					<div style="height:35%"">
+				   
+						<canvas id="canvas" class="chart"></canvas>	
+				  
+					</div>
+				  
+				  </div>
+				  
+				  <div id="generated_screenshot">
+				  
+				  
+				  				  <h2>Copy this picture 👇</h2>
+				  
+				 <canvas id="screenshot" class="screen"></canvas></div>
+				  
+				  
+				  </div>
+				  
+		
+		</center>
+
+	  </div>
+	 
+	
+
+
+    </main>
+
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="html2canvas.min.js"></script>
+<script src="textFit.min.js"></script>
+</body>
+</html>
