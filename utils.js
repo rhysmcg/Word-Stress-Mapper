@@ -1,162 +1,188 @@
-import colorLib from '@kurkle/color';
-import {DateTime} from 'luxon';
-import 'chartjs-adapter-luxon';
-import {valueOrDefault} from '../../dist/helpers.esm';
+var _____WB$wombat$assign$function_____ = function(name) {return (self._wb_wombat && self._wb_wombat.local_init && self._wb_wombat.local_init(name)) || self[name]; };
+if (!self.__WB_pmw) { self.__WB_pmw = function(obj) { this.__WB_source = obj; return this; } }
+{
+  let window = _____WB$wombat$assign$function_____("window");
+  let self = _____WB$wombat$assign$function_____("self");
+  let document = _____WB$wombat$assign$function_____("document");
+  let location = _____WB$wombat$assign$function_____("location");
+  let top = _____WB$wombat$assign$function_____("top");
+  let parent = _____WB$wombat$assign$function_____("parent");
+  let frames = _____WB$wombat$assign$function_____("frames");
+  let opener = _____WB$wombat$assign$function_____("opener");
 
-// Adapted from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
-var _seed = Date.now();
+'use strict';
 
-export function srand(seed) {
-  _seed = seed;
-}
-
-export function rand(min, max) {
-  min = valueOrDefault(min, 0);
-  max = valueOrDefault(max, 0);
-  _seed = (_seed * 9301 + 49297) % 233280;
-  return min + (_seed / 233280) * (max - min);
-}
-
-export function numbers(config) {
-  var cfg = config || {};
-  var min = valueOrDefault(cfg.min, 0);
-  var max = valueOrDefault(cfg.max, 100);
-  var from = valueOrDefault(cfg.from, []);
-  var count = valueOrDefault(cfg.count, 8);
-  var decimals = valueOrDefault(cfg.decimals, 8);
-  var continuity = valueOrDefault(cfg.continuity, 1);
-  var dfactor = Math.pow(10, decimals) || 0;
-  var data = [];
-  var i, value;
-
-  for (i = 0; i < count; ++i) {
-    value = (from[i] || 0) + this.rand(min, max);
-    if (this.rand() <= continuity) {
-      data.push(Math.round(dfactor * value) / dfactor);
-    } else {
-      data.push(null);
-    }
-  }
-
-  return data;
-}
-
-export function points(config) {
-  const xs = this.numbers(config);
-  const ys = this.numbers(config);
-  return xs.map((x, i) => ({x, y: ys[i]}));
-}
-
-export function bubbles(config) {
-  return this.points(config).map(pt => {
-    pt.r = this.rand(config.rmin, config.rmax);
-    return pt;
-  });
-}
-
-export function labels(config) {
-  var cfg = config || {};
-  var min = cfg.min || 0;
-  var max = cfg.max || 100;
-  var count = cfg.count || 8;
-  var step = (max - min) / count;
-  var decimals = cfg.decimals || 8;
-  var dfactor = Math.pow(10, decimals) || 0;
-  var prefix = cfg.prefix || '';
-  var values = [];
-  var i;
-
-  for (i = min; i < max; i += step) {
-    values.push(prefix + Math.round(dfactor * i) / dfactor);
-  }
-
-  return values;
-}
-
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
-
-export function months(config) {
-  var cfg = config || {};
-  var count = cfg.count || 12;
-  var section = cfg.section;
-  var values = [];
-  var i, value;
-
-  for (i = 0; i < count; ++i) {
-    value = MONTHS[Math.ceil(i) % 12];
-    values.push(value.substring(0, section));
-  }
-
-  return values;
-}
-
-const COLORS = [
-  '#4dc9f6',
-  '#f67019',
-  '#f53794',
-  '#537bc4',
-  '#acc236',
-  '#166a8f',
-  '#00a950',
-  '#58595b',
-  '#8549ba'
-];
-
-export function color(index) {
-  return COLORS[index % COLORS.length];
-}
-
-export function transparentize(value, opacity) {
-  var alpha = opacity === undefined ? 0.5 : 1 - opacity;
-  return colorLib(value).alpha(alpha).rgbString();
-}
-
-export const CHART_COLORS = {
-  red: 'rgb(255, 99, 132)',
-  orange: 'rgb(255, 159, 64)',
-  yellow: 'rgb(255, 205, 86)',
-  green: 'rgb(75, 192, 192)',
-  blue: 'rgb(54, 162, 235)',
-  purple: 'rgb(153, 102, 255)',
-  grey: 'rgb(201, 203, 207)'
+window.chartColors = {
+	red: 'rgb(255, 99, 132)',
+	orange: 'rgb(255, 159, 64)',
+	yellow: 'rgb(255, 205, 86)',
+	green: 'rgb(75, 192, 192)',
+	blue: 'rgb(54, 162, 235)',
+	purple: 'rgb(153, 102, 255)',
+	grey: 'rgb(201, 203, 207)'
 };
 
-const NAMED_COLORS = [
-  CHART_COLORS.red,
-  CHART_COLORS.orange,
-  CHART_COLORS.yellow,
-  CHART_COLORS.green,
-  CHART_COLORS.blue,
-  CHART_COLORS.purple,
-  CHART_COLORS.grey,
-];
+(function(global) {
+	var MONTHS = [
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December'
+	];
 
-export function namedColor(index) {
-  return NAMED_COLORS[index % NAMED_COLORS.length];
+	var COLORS = [
+		'#4dc9f6',
+		'#f67019',
+		'#f53794',
+		'#537bc4',
+		'#acc236',
+		'#166a8f',
+		'#00a950',
+		'#58595b',
+		'#8549ba'
+	];
+
+	var Samples = global.Samples || (global.Samples = {});
+	var Color = Chart.helpers.color;
+
+	function applyDefaultNumbers(config) {
+		var cfg = config || {};
+		cfg.min = cfg.min || 0;
+		cfg.max = cfg.max || 1;
+		cfg.from = cfg.from || [];
+		cfg.count = cfg.count || 8;
+		cfg.decimals = cfg.decimals || 8;
+		cfg.continuity = cfg.continuity || 1;
+
+		return cfg;
+	}
+
+	Samples.utils = {
+		// Adapted from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
+		srand: function(seed) {
+			this._seed = seed;
+		},
+
+		rand: function(min, max) {
+			var seed = this._seed;
+			min = min === undefined ? 0 : min;
+			max = max === undefined ? 1 : max;
+			this._seed = (seed * 9301 + 49297) % 233280;
+			return min + (this._seed / 233280) * (max - min);
+		},
+
+		numbers: function(config) {
+			var cfg = applyDefaultNumbers(config);
+			var dfactor = Math.pow(10, cfg.decimals) || 0;
+			var data = [];
+			var i, value;
+
+			for (i = 0; i < cfg.count; ++i) {
+				value = (cfg.from[i] || 0) + this.rand(cfg.min, cfg.max);
+				if (this.rand() <= cfg.continuity) {
+					data.push(Math.round(dfactor * value) / dfactor);
+				} else {
+					data.push(null);
+				}
+			}
+
+			return data;
+		},
+
+		labels: function(config) {
+			var cfg = config || {};
+			var min = cfg.min || 0;
+			var max = cfg.max || 100;
+			var count = cfg.count || 8;
+			var step = (max - min) / count;
+			var decimals = cfg.decimals || 8;
+			var dfactor = Math.pow(10, decimals) || 0;
+			var prefix = cfg.prefix || '';
+			var values = [];
+			var i;
+
+			for (i = min; i < max; i += step) {
+				values.push(prefix + Math.round(dfactor * i) / dfactor);
+			}
+
+			return values;
+		},
+
+		months: function(config) {
+			var cfg = config || {};
+			var count = cfg.count || 12;
+			var section = cfg.section;
+			var values = [];
+			var i, value;
+
+			for (i = 0; i < count; ++i) {
+				value = MONTHS[Math.ceil(i) % 12];
+				values.push(value.substring(0, section));
+			}
+
+			return values;
+		},
+
+		color: function(index) {
+			return COLORS[index % COLORS.length];
+		},
+
+		transparentize: function(color, opacity) {
+			var alpha = opacity === undefined ? 0.5 : 1 - opacity;
+			return Color(color).alpha(alpha).rgbString();
+		}
+	};
+
+	// DEPRECATED
+	window.randomScalingFactor = function() {
+		return Math.round(Samples.utils.rand(-100, 100));
+	};
+
+	// INITIALIZATION
+
+	Samples.utils.srand(Date.now());
+
+	// Google Analytics
+	/* eslint-disable */
+	if (document.location.hostname.match(/^(www\.)?chartjs\.org$/)) {
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//web.archive.org/web/20201122163727/https://www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-28909194-3', 'auto');
+		ga('send', 'pageview');
+	}
+	/* eslint-enable */
+
+}(this));
+
+
 }
+/*
+     FILE ARCHIVED ON 16:37:27 Nov 22, 2020 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 13:58:10 Feb 27, 2023.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
 
-export function newDate(days) {
-  return DateTime.now().plus({days}).toJSDate();
-}
-
-export function newDateString(days) {
-  return DateTime.now().plus({days}).toISO();
-}
-
-export function parseISODate(str) {
-  return DateTime.fromISO(str);
-}
-
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+*/
+/*
+playback timings (ms):
+  captures_list: 248.675
+  exclusion.robots: 0.133
+  exclusion.robots.policy: 0.117
+  RedisCDXSource: 0.877
+  esindex: 0.01
+  LoadShardBlock: 221.545 (3)
+  PetaboxLoader3.datanode: 67.151 (4)
+  load_resource: 340.125
+  PetaboxLoader3.resolve: 319.039
+*/
